@@ -1,7 +1,7 @@
 #!/bin/bash
 #---------------------------------------------------------------------
 #       $Source: /usr/local/bin/RCS/klipper-cmd,v $
-#           $Id: klipper-cmd,v 1.3 2018/01/06 17:40:13 kramski Exp kramski $
+#           $Id: klipper-cmd,v 1.4 2018/01/06 17:56:38 kramski Exp kramski $
 #        Author: kramski@web.de
 #         Usage: see $USAGE
 #       Purpose: Transform clipboard content 
@@ -11,6 +11,9 @@
 #          ToDo: 
 #---------------------------------------------------------------------
 #  $Log: klipper-cmd,v $
+#  Revision 1.4  2018/01/06 17:56:38  kramski
+#  https://www.shellcheck.net/: SC2086: Double quote to prevent globbing and word splitting.
+#
 #  Revision 1.3  2018/01/06 17:40:13  kramski
 #  Correctly process multiline content line-by-line so multiple cell selections in Calc can be processed at once.
 #
@@ -25,7 +28,7 @@
 set -u +x
 
 # Constants:
-ID=(\$Id: klipper-cmd,v 1.3 2018/01/06 17:40:13 kramski Exp kramski $)
+ID=(\$Id: klipper-cmd,v 1.4 2018/01/06 17:56:38 kramski Exp kramski $)
 ME=${ID[1]%%,*}
 VERSION=${ID[2]}
 USAGE="Usage: $ME [OPTION] CMD [ARG]...
@@ -175,10 +178,10 @@ function command_invertname {
                 invname="$line"
         esac
         if (( i<numlines-1 )); then
-            echo $invname
+            echo "$invname"
         else
             # no trailing \n after last line
-            echo -n $invname
+            echo -n "$invname"
         fi
     done
 }
