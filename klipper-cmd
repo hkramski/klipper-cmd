@@ -1,16 +1,19 @@
 #!/bin/bash
 #---------------------------------------------------------------------
 #       $Source: /usr/local/bin/RCS/klipper-cmd,v $
-#           $Id: klipper-cmd,v 1.1 2018/01/06 15:03:46 kramski Exp kramski $
+#           $Id: klipper-cmd,v 1.2 2018/01/06 15:57:24 kramski Exp kramski $
 #        Author: kramski@web.de
 #         Usage: see $USAGE
 #       Purpose: Transform clipboard content 
 #   Environment: Bash 4, KDE's Klipper
 #       Remarks: Script based on https://esisteinfehleraufgetreten.wordpress.com/2011/08/31/textsnippets-bei-kde-mit-und-ohne-klipper/
 #                and https://github.com/RenatGilmanov/shell-script-template/blob/master/getopts/template-commands.sh
-#          ToDo: 
+#          ToDo: - Correctly process multiline content line-by-line so multiple cell selections in Calc can be processed at once.
 #---------------------------------------------------------------------
 #  $Log: klipper-cmd,v $
+#  Revision 1.2  2018/01/06 15:57:24  kramski
+#  *** empty log message ***
+#
 #  Revision 1.1  2018/01/06 15:03:46  kramski
 #  Initial revision
 #
@@ -19,7 +22,7 @@
 set -u +x
 
 # Constants:
-ID=(\$Id: klipper-cmd,v 1.1 2018/01/06 15:03:46 kramski Exp kramski $)
+ID=(\$Id: klipper-cmd,v 1.2 2018/01/06 15:57:24 kramski Exp kramski $)
 ME=${ID[1]%%,*}
 VERSION=${ID[2]}
 USAGE="Usage: $ME [OPTION] CMD [ARG]...
@@ -53,7 +56,7 @@ USAGE="Usage: $ME [OPTION] CMD [ARG]...
    Command: $ME capitalize '%s' 
    Output Handling: Add to Clipboard
    Description: Capitalize each word.
-" >&2
+"
 
 # Check for CMD:
 if [[ "$#" -eq 0 ]]; then
