@@ -4,9 +4,9 @@ Bash script to transform and output clipboard content using KDE's Klipper.
 
 ## Installation
 
-Put this script into `/usr/local/bin`.
+Put the script `klipper-cmd` into `/usr/local/bin`.
 
-For Klipper actions and commands see below,
+For Klipper actions and commands see below.
 
 ## Usage
 
