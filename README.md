@@ -41,3 +41,8 @@ klipper-cmd: Usage: klipper-cmd [OPTION] CMD [ARG]...
    Output Handling: Add to Clipboard
    Description: Capitalize each word.
 ```
+
+## Credits
+
+This script is based on https://esisteinfehleraufgetreten.wordpress.com/2011/08/31/textsnippets-bei-kde-mit-und-ohne-klipper/
+and https://github.com/RenatGilmanov/shell-script-template/blob/master/getopts/template-commands.sh.
