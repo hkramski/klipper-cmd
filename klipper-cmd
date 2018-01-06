@@ -1,0 +1,164 @@
+#!/bin/bash
+#---------------------------------------------------------------------
+#       $Source: /usr/local/bin/RCS/klipper-cmd,v $
+#           $Id: klipper-cmd,v 1.1 2018/01/06 15:03:46 kramski Exp kramski $
+#        Author: kramski@web.de
+#         Usage: see $USAGE
+#       Purpose: Transform clipboard content 
+#   Environment: Bash 4, KDE's Klipper
+#       Remarks: Script based on https://esisteinfehleraufgetreten.wordpress.com/2011/08/31/textsnippets-bei-kde-mit-und-ohne-klipper/
+#                and https://github.com/RenatGilmanov/shell-script-template/blob/master/getopts/template-commands.sh
+#          ToDo: 
+#---------------------------------------------------------------------
+#  $Log: klipper-cmd,v $
+#  Revision 1.1  2018/01/06 15:03:46  kramski
+#  Initial revision
+#
+# ------------------------------------------------------------------
+
+set -u +x
+
+# Constants:
+ID=(\$Id: klipper-cmd,v 1.1 2018/01/06 15:03:46 kramski Exp kramski $)
+ME=${ID[1]%%,*}
+VERSION=${ID[2]}
+USAGE="Usage: $ME [OPTION] CMD [ARG]...
+
+ Transform and output clipboard content (using KDE's Klipper) or ARG as indicated by CMD.
+ 
+ Options:
+  -h            Display this help and exit
+  -v            Output version information and exit
+ 
+ CMD:
+  capitalize    Capitalize each word
+  invertname    Change \"Firstname Lastname\" to \"Lastname, Firstname\" and vice versa
+  lowercase     Transform content to lowercase
+  underscores   Change all blanks to underscores and vice versa
+  uppercase     Transform content to uppercase
+  
+ ARG:
+  If present, work on ARG instead of current clipboard content.
+  Use '%s' for current clipboard content when defining Klipper commands.
+
+ This script may be run from the command line but is much more useful when called from Klipper actions, 
+ see https://docs.kde.org/trunk5/en/kde-workspace/klipper/actions-page.html.
+ 
+ To use this script with Klipper:
+  Open the actions configuration page.
+  Add an action with the following properties:
+   Regular Expression: .*
+   Description: Any content.
+  Add one or more commands to this action like this (see CMD):
+   Command: $ME capitalize '%s' 
+   Output Handling: Add to Clipboard
+   Description: Capitalize each word.
+" >&2
+
+# Check for CMD:
+if [[ "$#" -eq 0 ]]; then
+    echo "$ME: $USAGE" >&2
+    exit 1;
+fi
+
+# Option processing 
+while getopts ":vh" optname; do
+    case "$optname" in
+        "v")
+            echo "$ME: Version $VERSION"
+            exit 0;
+            ;;
+        "h")
+            echo "$ME: $USAGE"
+            exit 0;
+            ;;
+        "?")
+            echo "$ME: Unknown option $OPTARG" >&2
+            exit 1;
+            ;;
+        ":")
+            echo "$ME: No argument value for option $OPTARG" >&2
+            exit 1;
+            ;;
+        *)
+            echo "$ME: Unknown error while processing options"
+            exit 1;
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+# Get command
+cmd=$1
+command="command_$1"
+
+# Get clipboard content 
+shift 1
+if [[ "$#" -eq 0 ]]; then
+    # Get current clipboard content from Klipper
+    if ! clip=$( qdbus org.kde.klipper /klipper org.kde.klipper.klipper.getClipboardContents ); then
+        echo "$ME: Error getting clipboard content from Klipper" >&2
+        exit 1;
+    fi
+else
+    # Get clipboard content from command line
+    clip="$*"
+fi
+
+# -----------------------------------------------------------------
+function command_test {
+    echo "cmd=test" 
+    echo "clip=\"$clip\""
+}
+
+function command_uppercase {
+    echo -n "${clip^^}"
+}
+
+function command_lowercase {
+    echo -n "${clip,,}"
+}
+
+function command_capitalize {
+    clip="${clip,,}"
+    # cap=( $clip )
+    IFS=" " read -r -a cap <<< "$clip"
+    echo -n "${cap[@]^}"
+}
+
+function command_underscores {
+    case $clip in
+	*_*)  # e.g. "12_Years_a_Slave"
+		echo -n "${clip//_/ }"
+		;;
+	*\ *)	# e.g. "12 Years a Slave"
+		echo -n "${clip// /_}"
+		;;
+	*)	# other
+		echo -n "$clip"
+    esac
+}
+
+function command_invertname {
+    case $clip in
+	*,\ *)  # e.g. "DeMarco, Tom"
+		echo -n "${clip#*, } ${clip%%, *}"
+		;;
+	*\ *)	# e.g. "Tom DeMarco"
+		echo -n "${clip##* }, ${clip% *}"
+		;;
+	*)	# other
+		echo -n "$clip"
+    esac
+}
+
+
+# -----------------------------------------------------------------
+if [ -n "$(type -t "${command}")" ] && [ "$(type -t "${command}")" = function ]; then 
+    ${command}
+else 
+    echo "$ME: '${cmd}' is NOT a command" >&2
+    exit 1
+fi
+
