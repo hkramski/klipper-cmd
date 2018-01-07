@@ -21,6 +21,7 @@ klipper-cmd: Usage: klipper-cmd [OPTION] CMD [ARG]...
   capitalize    Capitalize each word
   invertname    Change "Firstname Lastname" to "Lastname, Firstname" and vice versa
   lowercase     Transform content to lowercase
+  print         Simply print the clipboard content (useful on command line only)
   underscores   Change all blanks to underscores and vice versa
   uppercase     Transform content to uppercase
   
