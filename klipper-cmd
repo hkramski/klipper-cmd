@@ -1,7 +1,7 @@
 #!/bin/bash
 #---------------------------------------------------------------------
 #       $Source: /usr/local/bin/RCS/klipper-cmd,v $
-#           $Id: klipper-cmd,v 1.4 2018/01/06 17:56:38 kramski Exp kramski $
+#           $Id: klipper-cmd,v 1.5 2018/01/07 01:24:36 kramski Exp kramski $
 #        Author: kramski@web.de
 #         Usage: see $USAGE
 #       Purpose: Transform clipboard content 
@@ -11,6 +11,9 @@
 #          ToDo: 
 #---------------------------------------------------------------------
 #  $Log: klipper-cmd,v $
+#  Revision 1.5  2018/01/07 01:24:36  kramski
+#  Add "print" CMD; Cosmetics
+#
 #  Revision 1.4  2018/01/06 17:56:38  kramski
 #  https://www.shellcheck.net/: SC2086: Double quote to prevent globbing and word splitting.
 #
@@ -28,7 +31,7 @@
 set -u +x
 
 # Constants:
-ID=(\$Id: klipper-cmd,v 1.4 2018/01/06 17:56:38 kramski Exp kramski $)
+ID=(\$Id: klipper-cmd,v 1.5 2018/01/07 01:24:36 kramski Exp kramski $)
 ME=${ID[1]%%,*}
 VERSION=${ID[2]}
 USAGE="Usage: $ME [OPTION] CMD [ARG]...
@@ -41,8 +44,9 @@ USAGE="Usage: $ME [OPTION] CMD [ARG]...
  
  CMD:
   capitalize    Capitalize each word
-  invertname    Change \"Firstname Lastname\" to \"Lastname, Firstname\" and vice versa
+  invertnames   Change \"Firstname Lastname\" to \"Lastname, Firstname\" and vice versa
   lowercase     Transform content to lowercase
+  print         Simply print the clipboard content (useful on command line only)
   underscores   Change all blanks to underscores and vice versa
   uppercase     Transform content to uppercase
   
@@ -65,7 +69,7 @@ USAGE="Usage: $ME [OPTION] CMD [ARG]...
 "
 
 # Check for CMD:
-if [[ "$#" -eq 0 ]]; then
+if [ "$#" -eq 0 ]; then
     echo "$ME: $USAGE" >&2
     exit 1;
 fi
@@ -99,12 +103,12 @@ done
 shift $((OPTIND - 1))
 
 # Get command
-cmd=$1
+cmd="$1"
 command="command_$1"
 
 # Get clipboard content 
 shift 1
-if [[ "$#" -eq 0 ]]; then
+if [ "$#" -eq 0 ]; then
     # Get current clipboard content from Klipper
     if ! clip=$( qdbus org.kde.klipper /klipper org.kde.klipper.klipper.getClipboardContents ); then
         echo "$ME: Error getting clipboard content from Klipper" >&2
@@ -116,9 +120,8 @@ else
 fi
 
 # -----------------------------------------------------------------
-function command_test {
-    echo "cmd=test" 
-    echo "clip=\"$clip\""
+function command_print {
+    echo "$clip"
 }
 
 function command_uppercase {
@@ -136,9 +139,9 @@ function command_capitalize {
     readarray -t lines <<< "$clip"
     numlines=${#lines[@]}
 
-    for (( i=0; i<numlines; i++ )); do
+    for (( i=0; i < numlines; i++ )); do
         IFS=" " read -r -a cap <<< "${lines[$i]}"
-        if (( i<numlines-1 )); then
+        if (( i < numlines-1 )); then
             echo "${cap[@]^}"
         else
             # no trailing \n after last line
@@ -149,23 +152,23 @@ function command_capitalize {
 
 function command_underscores {
     case $clip in
-	*_*)  # e.g. "12_Years_a_Slave"
-		echo -n "${clip//_/ }"
-		;;
-	*\ *)	# e.g. "12 Years a Slave"
-		echo -n "${clip// /_}"
-		;;
-	*)	# other
-		echo -n "$clip"
+        *_*)  # e.g. "12_Years_a_Slave"
+            echo -n "${clip//_/ }"
+            ;;
+        *\ *)	# e.g. "12 Years a Slave"
+            echo -n "${clip// /_}"
+            ;;
+        *)	# other
+            echo -n "$clip"
     esac
 }
 
-function command_invertname {
+function command_invertnames {
     # read all lines into array, omitting trailing \n:
     readarray -t lines <<< "$clip"
     numlines=${#lines[@]}
 
-    for (( i=0; i<numlines; i++ )); do
+    for (( i=0; i < numlines; i++ )); do
         line=${lines[$i]}
         case $line in
             *,\ *)  # e.g. "DeMarco, Tom"
@@ -177,7 +180,7 @@ function command_invertname {
             *)	# other
                 invname="$line"
         esac
-        if (( i<numlines-1 )); then
+        if (( i < numlines-1 )); then
             echo "$invname"
         else
             # no trailing \n after last line
