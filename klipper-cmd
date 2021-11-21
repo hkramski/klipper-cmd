@@ -1,39 +1,18 @@
 #!/bin/bash
 #---------------------------------------------------------------------
-#       $Source: /usr/local/bin/RCS/klipper-cmd,v $
-#           $Id: klipper-cmd,v 1.5 2018/01/07 01:24:36 kramski Exp kramski $
 #        Author: kramski@web.de
 #         Usage: see $USAGE
-#       Purpose: Transform clipboard content 
+#       Purpose: Transform clipboard content (or argument)
 #   Environment: Bash 4, KDE's Klipper
 #       Remarks: Script based on https://esisteinfehleraufgetreten.wordpress.com/2011/08/31/textsnippets-bei-kde-mit-und-ohne-klipper/
 #                and https://github.com/RenatGilmanov/shell-script-template/blob/master/getopts/template-commands.sh
 #          ToDo: 
 #---------------------------------------------------------------------
-#  $Log: klipper-cmd,v $
-#  Revision 1.5  2018/01/07 01:24:36  kramski
-#  Add "print" CMD; Cosmetics
-#
-#  Revision 1.4  2018/01/06 17:56:38  kramski
-#  https://www.shellcheck.net/: SC2086: Double quote to prevent globbing and word splitting.
-#
-#  Revision 1.3  2018/01/06 17:40:13  kramski
-#  Correctly process multiline content line-by-line so multiple cell selections in Calc can be processed at once.
-#
-#  Revision 1.2  2018/01/06 15:57:24  kramski
-#  *** empty log message ***
-#
-#  Revision 1.1  2018/01/06 15:03:46  kramski
-#  Initial revision
-#
-# ------------------------------------------------------------------
 
 set -u +x
 
 # Constants:
-ID=(\$Id: klipper-cmd,v 1.5 2018/01/07 01:24:36 kramski Exp kramski $)
-ME=${ID[1]%%,*}
-VERSION=${ID[2]}
+ME=$(basename "$0")
 USAGE="Usage: $ME [OPTION] CMD [ARG]...
 
  Transform and output clipboard content (using KDE's Klipper) or ARG as indicated by CMD.
@@ -45,6 +24,8 @@ USAGE="Usage: $ME [OPTION] CMD [ARG]...
  CMD:
   capitalize    Capitalize each word
   invertnames   Change \"Firstname Lastname\" to \"Lastname, Firstname\" and vice versa
+  join          Join lines by replacing linebreaks with blanks
+  join2         Like \"join\", but also remove trailing hyphens before joining lines
   lowercase     Transform content to lowercase
   print         Simply print the clipboard content (useful on command line only)
   underscores   Change all blanks to underscores and vice versa
@@ -133,7 +114,7 @@ function command_lowercase {
 }
 
 function command_capitalize {
-    clip="${clip,,}"
+    clip="${clip,,}" # erst mal alles lowercase machen
     
     # read all lines into array, omitting trailing \n:
     readarray -t lines <<< "$clip"
@@ -149,6 +130,23 @@ function command_capitalize {
         fi
     done
 }
+
+function command_join {
+    # read all lines into array, omitting trailing \n:
+    readarray -t lines <<< "$clip"
+    echo -n "${lines[@]}"
+}
+
+function command_join2 {
+    # read all lines into array, omitting trailing \n:
+    readarray -t lines <<< "$clip"
+    numlines=${#lines[@]}
+
+    for (( i=0; i < numlines; i++ )); do
+        echo -n "${lines[$i]%-}" # also strip trailing hyphen (useful for content from books or articles)
+    done
+}
+
 
 function command_underscores {
     case $clip in
@@ -197,4 +195,3 @@ else
     echo "$ME: '${cmd}' is NOT a command" >&2
     exit 1
 fi
-
