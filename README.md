@@ -13,6 +13,8 @@ For Klipper actions and commands see below.
 ```
 klipper-cmd: Usage: klipper-cmd [OPTION] CMD [ARG]...
 
+ Transform and output clipboard content (using KDE's Klipper) or ARG as indicated by CMD.
+ 
  Options:
   -h            Display this help and exit
   -v            Output version information and exit
@@ -20,6 +22,8 @@ klipper-cmd: Usage: klipper-cmd [OPTION] CMD [ARG]...
  CMD:
   capitalize    Capitalize each word
   invertnames   Change "Firstname Lastname" to "Lastname, Firstname" and vice versa
+  join          Join lines by replacing linebreaks with blanks
+  join2         Like "join", but also remove trailing hyphens before joining lines
   lowercase     Transform content to lowercase
   print         Simply print the clipboard content (useful on command line only)
   underscores   Change all blanks to underscores and vice versa
