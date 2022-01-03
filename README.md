@@ -1,5 +1,7 @@
 # klipper-cmd
 
+Project moved to Codeberg: https://codeberg.org/harveyk/klipper-cmd.
+
 Bash script to transform and output clipboard content using KDE's Klipper.
 
 ## Installation
